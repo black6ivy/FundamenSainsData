@@ -1,0 +1,66 @@
+---
+title: "Game Sales Clustering with DBScan"
+output: html_notebook
+---
+Thalia Maharani N H 19523022
+Muhammad Sayyid Tsabit A 19523090
+
+Kali ini kami akan mencoba menggunakan DBScan kepada dataset Game Sales. Di sini kami menggunakan package factoextra. Kami mengambil kolom ke 6 dan 7 pada baris ke-3 dari script di bawah ini yang merepresentaasikan berbagai macam bentuk
+```{r}
+library(factoextra)
+game <- read.csv("data/Video_Games_Sales_as_at_22_Dec_2016.csv")
+df <- game[, 6:7]
+```
+Selanjutnya mari kita plot data tersebut. Maksud dari pch=16 adalah tipe simbol ke-16 untuk sebuah data point; di sini, kami memilih simbol sebuah lingkaran solid untuk sebuah data point.
+```{r}
+plot(df, pch=16)
+```
+Berdasarkan plot data set di atas, secara intuisi kita melihat ada sekitar 5 cluster. Mari kita coba aplikasi K-Means dengan 5 cluster
+
+```{r}
+set.seed(123)
+km.res <- kmeans(df, 5, nstart = 25)
+fviz_cluster(km.res, df, frame = FALSE, geom = "ellipse")
+```
+Dapat dilihat sebagaimana hasil diatas,Meski tidak terlalu terlihat jelas diakrenakan data yang banyak, K-Means memberikan 5 cluster namun diniliai tidak cocok untuk digunakan untuk data ini karena K-means digunakan untuk sebaran data yang lazim.
+
+Selanjutnya, kami aplikasikan DBSCAN pada data yang sama, disini kami tidak perlu menentukan jumlah cluster di awal.
+Di sini kita akan menggunakan fungsi dbscan() dari package fpc, dengan parameter ϵ=5 minPts=5
+
+```{r}
+library("fpc")
+set.seed(123)
+db <- dbscan(df, eps = 0.13, MinPts = 5)
+plot(db, df, main = "DBSCAN", frame = FALSE)
+```
+Dari hasil di atas, dapat kita lihat jika DBSCAN mampu menemukan 5 cluster yang kita bayangkan secara intuisi beserta data point yang sekiranya termasuk noise (simbol lingkaran tanpa warna).
+
+Sebagai alternatif untuk plot, kita juga dapat menggunakan sebuah fungsi untuk plot cluster dari factoexra.
+
+```{r}
+library("factoextra")
+fviz_cluster(db, df, stand = FALSE, frame = FALSE, geom = "ellipse")
+```
+
+Untuk melihat lebih detil dari hasil DBSCAN, kita dapat melihat lewat script,
+```{r}
+print(db)
+```
+Kolom pada tabel di atas merepresentasikan cluster (dengan kolom 0 merepresentasikan noise). Baris border mengindikasikan jumlah border point, seed jumlah core point, total jumlah total (core + border) data point pada cluster tersebut.
+Dapat dilihat cluster 2 memiliki jumlah terbanyak (16400) dan cluster 3 memilki jumlah sedikit(5),
+Untuk melihat indeks cluster dari setiap data point,
+```{r}
+db$cluster
+```
+
+Pendekatan untuk menentukan parameter ϵ dan minPts.
+Masih menggunakan data set yang sama (df) dengan contoh di atas, kita ingin melihat k-distance graph dengan k=5.
+
+```{r}
+library(dbscan)
+kNNdistplot(df, k =  5)
+abline(h = 0.13, lty = 2)
+```
+Dari plot yang di dapat, kita dapat lihat bahwa lembah pada kurva adalah ketika jarak = 0 Nilai inilah yang kita jadikan sebagai nilai ϵ 
+ϵ
+.

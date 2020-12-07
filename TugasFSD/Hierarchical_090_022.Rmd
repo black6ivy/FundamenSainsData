@@ -1,0 +1,34 @@
+---
+title: "Game Sales Clustering with Hierarchical"
+output: html_notebook
+---
+Thalia Maharani N H 19523022
+Muhammad Sayyid Tsabit A 19523090
+
+Pada tugas ini kami masih menggunakan dataset yang sama seperti tugas KMeans. Mari kita lihat lebih detail tentang data tersebut.
+
+```{r}
+game <- read.csv("data/Video_Games_Sales_as_at_22_Dec_2016.csv")
+summary(game)
+```
+dengan menggunakan'barplot()' Kita dapa mendapatkan visualisasi dari setiap variabel. Pada Baris 1 membuat sebuah data frame dari data set Game dan menambahkan saru kolom berisi global_sales. Baris 2 untuk mengubah orientasi label pada sumbu vertikal sehingga daapt terbaca secara horizontal (lihat nama game), dan Baris 3 untuk mengatur margin, sehingga posisi barplot lebih di tengah. Baris 4 membuat barplot untuk variabel Global_Sales; baris-barise selanjutnya membuat barplot untuk variabel lain.
+```{r}
+df <- data.frame(States=rownames(game), game)
+par(las=2) # make label text perpendicular to axis
+par(mar=c(5,8,4,2)) # increase y-axis margin.
+barplot(df$Global_Sales, names.arg = df$Name, horiz = TRUE, cex.names = 0.5, xlab = "Global Sales per Game")
+```
+
+
+
+```{r}
+head(df)
+```
+Berikut merupakan hierachical clustering menggunakan fungsi hclust. Disini kami menggunakan 3 variable tanpa variable NA_Sales. Fungsi hclust menerima matriks jarak (dissimilarity meassure dari setiap pasang variabel), maka kita menghitung matriks tersebut lewat Baris 2. Pada Baris 3, kita melakukan hiearchical clustering dengan metode complete linkage. Baris 4 membuat plot dendrogram dari hasil clustering; parameter cex emngatur besar font untuk label pada sumbu x, hang mengatur posisi label terhadap sumbu y.
+```{r}
+df <- scale(df[,7:9])
+d <- dist(df, method = "euclidean")
+clusters <- hclust(d, method = "complete" )
+plot(clusters, cex = 0.6, hang = -1)
+```
+

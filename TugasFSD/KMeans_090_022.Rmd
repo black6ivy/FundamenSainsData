@@ -1,0 +1,80 @@
+---
+title: "Game Sales Clustering with K means"
+output: html_notebook
+---
+Thalia Maharani N H 19523022
+Muhammad Sayyid Tsabit A 19523090
+
+Assalamualaikum wr wb 
+Pada tugas ini kami menggunakan data Games Sales Clustering yang telah didownload dari kaggle. Data ini berisikan penjualan video game diberbagai belahan dunia. Untuk itu kita meng import file csv terlebih dahulu dan mari kita lihat lebih detail tentang data tersebut
+
+```{r}
+game <- read.csv("data/Video_Games_Sales_as_at_22_Dec_2016.csv")
+head(game)
+summary(game)
+```
+Kami melakukan clustering menggunakan K-means pada data set game berdasalkan variable empat variable dimulai dari variable ke enam sampai ke sepuluh( NA_Sales, EU_Sales, JP_Sales, Other_Sales, dan GLobal_Sales). Mari kita lihat lagi tabel dengan variabel yang sudah dipilih.
+
+```{r}
+game.new<-game[,6:10]
+head(game.new)
+```
+Disini kami tidak menggunakan variable kelas 'Genre' . Kami juga ingin mencari 7 cluster.
+```{r}
+game.class<-game[,"Genre"]
+set.seed(1)
+res <- kmeans(game.new,7)
+```
+
+Sekarang mari kita visualisasikan, pada baris ke-1 parameter mfrow=c(2,2) 
+membagi ruang plot menjadi 2 baris dan 2 kolom, yang artinya ada 4 plot yang mungkin untuk ditampilkan bersama. Adapun parameter mar=c(5,4,2,2) mengatur ukuran margin dari plot.
+```{r} 
+par(mfrow=c(2,2), mar=c(5,4,2,2))
+plot(game.new[, c(1,5)], col=res$cluster)
+plot(game.new[, c(1,5)], col=game.class)
+plot(game.new[, c(2,5)], col=res$cluster)
+plot(game.new[, c(2,5)], col=game.class)
+```
+Plot pada kolom di sebelah kiri adalah hasil clustering menggunakan K-Means sedangkan plot kolom pada sebelah kanan adalah plot penjualan game berdasarkan dua variabel; Globa;_Sales-NA_Sales (plot di kanan-atas), Global_Sales-EU_Sales. Length (plot di kanan bawah).
+
+
+
+
+nilai distortion pada iterasi terakhir dapat dilihat melalui tot.withinss
+```{r}
+res$tot.withinss
+```
+Untuk melihat nilai apa saja yang dikembalikan oleh fungsi kmeans, dapat dilihat melalui
+```{r}
+attributes(res)$names
+```
+Untuk memanggil nilai tertentu di atas, dapat dilakukan dengan cara result$cluster, result$size. Baris ke-4 hingga ke-6 adalah plotting menggunakan ggplot2
+
+Di bawah ini, kita akan memvisualisasikan hasil clustering di atas, menggunakan package ggplot2
+```{r}
+game.new$cluster <- factor(res$cluster)
+centers <- as.data.frame(res$centers)
+library(ggplot2)
+ggplot() + 
+  geom_point(data=game.new, aes(x=NA_Sales, y=EU_Sales,color=cluster))  +
+  geom_point(data=centers, aes(x=NA_Sales, y=EU_Sales, color="Center"), 
+             size=52, alpha=.3, show.legend = FALSE)
+```
+Kesimpulan:
+ Dari ketiga method diatas, method K-means kami nilai lebih cocok untuk dataset Game Sales ini.Jika kami menggunakan Hierarchical data kami terlalu banyak untuk dibaca jelas grafiknya. Pada DBScan kami menemukan bentuk yg tidak aneh dan clustering yg diberikan oleh DBScan tidak jauh beda dengan kmeans. Oleh itu kami memilih KMeans
+ 
+ 
+Pengerjaan Soal Bonus:
+ 
+```{r}
+#silhoutte method
+library("factoextra")
+install.packages("NbClust")
+library(NbClust)
+fviz_nbclust(game.new, kmeans, method = "silhoutte") +
+  labs(subtitle = "silhoutte method")
+
+
+
+```
+ 
